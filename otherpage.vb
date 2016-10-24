@@ -205,4 +205,37 @@
         Form1.Show()
         Me.Close()
     End Sub
+
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        Using client As New Net.WebClient
+            Dim reqparm As New Specialized.NameValueCollection
+            reqparm.Add("privatekey", privateKey)
+            Dim responsebytes = client.UploadValues("http://krist.ceriat.net/names/" + TextBox5.Text + "", "POST", reqparm)
+            Dim responsebody = (New System.Text.UTF8Encoding).GetString(responsebytes)
+            If (responsebody.Substring(6, 4) = "true") Then
+                MessageBox.Show("Successfully purchased!")
+                Dim request3 As String = String.Format("http://krist.ceriat.net/addresses/{0}/names", address)
+                Dim webClient As New System.Net.WebClient
+
+                Dim result3 As String = webClient.DownloadString(request3)
+
+                Dim strLine1() As String = result3.Split(New String() {"name"""}, StringSplitOptions.RemoveEmptyEntries)
+                ListBox3.Items.Clear()
+                ListBox4.Items.Clear()
+                For Each line1 As String In strLine1.Skip(1)
+
+                    ListBox3.Items.Add(line1.Substring(2, InStr(line1, "owner") - 6))
+                    Dim a As String = midReturn("a"":""", """}", line1)
+                    If (a <> "") Then
+                        ListBox4.Items.Add(a)
+                    Else
+                        ListBox4.Items.Add("null")
+                    End If
+                Next
+                TextBox4.Text = ""
+            Else
+                MessageBox.Show("An error occured!")
+            End If
+        End Using
+    End Sub
 End Class
